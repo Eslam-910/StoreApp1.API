@@ -32,9 +32,9 @@ namespace Persistence
         //    return (IGenericRepository<TEntity, Tkey>) _Repositories[type];
         //}
 
-        public IGenericRepository<TEntity, Tkey> GetRepository<TEntity, Tkey>() where TEntity : BaseEntity<Tkey>
+        public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>
         {
-           return (IGenericRepository<TEntity, Tkey>)_Repositories.GetOrAdd(typeof(TEntity).Name, new GenericRepository<TEntity, Tkey>(_context));
+            return (IGenericRepository<TEntity, TKey>)_Repositories.GetOrAdd(typeof(TEntity).Name, new GenericRepository<TEntity, TKey>(_context));
         }
 
 

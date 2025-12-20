@@ -18,19 +18,29 @@ namespace Persistence.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<TEntity>> GetAllAsync(bool TrackChange = false)
+        public async Task<IEnumerable<TEntity>> GetAllAsync(bool trackChanges = false)
         {
-            if (TrackChange)
+            if (typeof(TEntity) == typeof(Product))
             {
-                return await _context.Set<TEntity>().ToListAsync();
+                return trackChanges ?
+                     await _context.Products.Include(P => P.ProductBrand).Include(P => P.ProductType).ToListAsync() as IEnumerable<TEntity>
+                   : await _context.Products.Include(P => P.ProductBrand).Include(P => P.ProductType).AsNoTracking().ToListAsync() as IEnumerable<TEntity>;
             }
-            return await _context.Set<TEntity>().AsNoTracking().ToListAsync(); 
+            return trackChanges ?                                                                                                          
+                await _context.Set<TEntity>().ToListAsync()
+             : await _context.Set<TEntity>().AsNoTracking().ToListAsync();
+
         }
 
-        public async Task<TEntity?> GetAsync(Tkey id)
+        public async Task<TEntity?> GetByIdAsync(Tkey id)
         {
-           return await _context.Set<TEntity>().FindAsync(id);
+            if (typeof(TEntity) == typeof(Product))
+            {
+                return await _context.Products.Include(P => P.ProductBrand).Include(P => P.ProductType).FirstOrDefaultAsync(P => P.Id == id as int?) as TEntity;
+            }
+            return await _context.Set<TEntity>().FindAsync(id);
         }
+
 
         public async Task AddAsync(TEntity entity)
         {
@@ -45,6 +55,26 @@ namespace Persistence.Repositories
         {
             _context.Remove(entity);
         }
-       
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity, Tkey> spec, bool TrackChange = false)
+        {
+            return await ApplySpecification(spec).ToListAsync();
+        }
+
+        public async Task<TEntity?> GetByIdAsync(ISpecifications<TEntity, Tkey> spec)
+        {
+            return await ApplySpecification(spec).FirstOrDefaultAsync();
+        }
+        public async Task<int> CountAsync(ISpecifications<TEntity, Tkey> spec)
+        {
+            return await ApplySpecification(spec).CountAsync();
+        }
+
+        private IQueryable<TEntity> ApplySpecification(ISpecifications<TEntity,Tkey>spec)
+        {
+            return SpecificationEvaluator.GetQuery(_context.Set<TEntity>(), spec);
+        }
+
+        
     }
 }
