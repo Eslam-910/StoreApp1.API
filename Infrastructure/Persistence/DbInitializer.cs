@@ -19,10 +19,10 @@ namespace Persistence
         {
             _context = context;
         }
-        public async Task InitializeAsync()
+       public async Task InitializeAsync()
         {
             try
-            {
+            { 
                 //Create Database It Doesn't Exists && Apply To Any Pending Migrations
                 if (_context.Database.GetPendingMigrations().Any())
                 {
