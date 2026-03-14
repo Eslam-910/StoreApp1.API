@@ -61,10 +61,11 @@ namespace Persistence.Repositories
             return await ApplySpecification(spec).ToListAsync();
         }
 
-        public async Task<TEntity?> GetByIdAsync(ISpecifications<TEntity, Tkey> spec)
+        public async Task<TEntity?> GetAsync(ISpecifications<TEntity, Tkey> spec)
         {
             return await ApplySpecification(spec).FirstOrDefaultAsync();
         }
+
         public async Task<int> CountAsync(ISpecifications<TEntity, Tkey> spec)
         {
             return await ApplySpecification(spec).CountAsync();
@@ -75,6 +76,6 @@ namespace Persistence.Repositories
             return SpecificationEvaluator.GetQuery(_context.Set<TEntity>(), spec);
         }
 
-        
+       
     }
 }
